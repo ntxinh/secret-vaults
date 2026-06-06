@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSecrets } from "../hooks/use-secrets";
 import type { Secret } from "../lib/schema";
 import { useAuthStore } from "../store/auth";
+import { DeleteSecretDialog } from "./delete-secret-dialog";
 import { SecretFormDialog } from "./secret-form-dialog";
 import { SecretsTable } from "./secrets-table";
 
@@ -25,9 +26,7 @@ export function Vault() {
     setDialogKey((k) => k + 1);
     setFormOpen(true);
   }
-  function onDelete(secret: Secret) {
-    console.log("delete", secret.id); // replaced in Task 15
-  }
+  const [deleting, setDeleting] = useState<Secret | null>(null);
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4 sm:p-8">
@@ -51,9 +50,10 @@ export function Vault() {
       ) : isError ? (
         <p className="text-red-400">Failed to load secrets.</p>
       ) : (
-        <SecretsTable secrets={secrets} onEdit={openEdit} onDelete={onDelete} />
+        <SecretsTable secrets={secrets} onEdit={openEdit} onDelete={setDeleting} />
       )}
       <SecretFormDialog key={dialogKey} open={formOpen} onOpenChange={setFormOpen} secret={editing} />
+      <DeleteSecretDialog secret={deleting} onOpenChange={(open) => { if (!open) setDeleting(null); }} />
     </main>
   );
 }
