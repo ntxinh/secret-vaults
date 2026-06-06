@@ -1,0 +1,28 @@
+"use client";
+
+import * as Toast from "@radix-ui/react-toast";
+import { useToastStore } from "../store/toasts";
+
+export function Toaster() {
+  const toasts = useToastStore((s) => s.toasts);
+  const dismiss = useToastStore((s) => s.dismiss);
+
+  return (
+    <Toast.Provider swipeDirection="right" duration={4000}>
+      {toasts.map((t) => (
+        <Toast.Root
+          key={t.id}
+          onOpenChange={(open) => {
+            if (!open) dismiss(t.id);
+          }}
+          className={`rounded-md px-4 py-3 text-sm shadow-lg ${
+            t.variant === "error" ? "bg-red-600 text-white" : "bg-zinc-800 text-zinc-100"
+          }`}
+        >
+          <Toast.Title>{t.title}</Toast.Title>
+        </Toast.Root>
+      ))}
+      <Toast.Viewport className="fixed bottom-4 right-4 z-50 flex w-80 flex-col gap-2" />
+    </Toast.Provider>
+  );
+}
