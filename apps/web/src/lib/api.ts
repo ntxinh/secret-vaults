@@ -52,6 +52,7 @@ async function call<T>(
         redirect: "follow",
       }),
     );
+    if (!res.ok) throw new ApiError("INTERNAL", `HTTP ${res.status}`);
     text = await res.text();
   } finally {
     clearTimeout(timer);

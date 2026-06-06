@@ -8,7 +8,7 @@ import type { Secret, SecretInput } from "../lib/schema";
 import { ENVIRONMENTS, SECRET_TYPE_LABELS, SECRET_TYPES } from "../lib/schema";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required").refine((s) => s.trim().length > 0, "Name cannot be blank"),
   value: z.string().min(1, "Value is required"),
   type: z.enum(SECRET_TYPES),
   project: z.string(),
