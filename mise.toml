@@ -1,0 +1,18 @@
+[tools]
+node = "22"
+pnpm = "10"
+
+[tasks.dev]
+run = "pnpm --filter web dev"
+
+[tasks.build]
+run = "pnpm --filter web build"
+
+[tasks.test]
+run = "pnpm -r test"
+
+[tasks."gas:push"]
+run = "pnpm --filter gas build && pnpm --filter gas push"
+
+[tasks."gas:deploy"]
+run = "pnpm --filter gas deploy"
