@@ -5,7 +5,7 @@ const cfg = { gasUrl: "https://script.example/exec", token: "tok" };
 
 const secret = {
   id: "abc", name: "n", value: "v", type: "api_key", project: "",
-  environment: "-", tags: [], notes: "",
+  environment: ["-"], tags: [], notes: "",
   createdAt: "2026-06-06T00:00:00.000Z", updatedAt: "2026-06-06T00:00:00.000Z",
 };
 
@@ -34,7 +34,7 @@ describe("api", () => {
 
   it("create sends payload and parses created secret", async () => {
     const fn = stubFetch({ ok: true, data: secret });
-    const input = { name: "n", value: "v", type: "api_key" as const, project: "", environment: "-" as const, tags: [], notes: "" };
+    const input = { name: "n", value: "v", type: "api_key" as const, project: "", environment: ["-" as const], tags: [], notes: "" };
     const result = await api.create(cfg, input);
     expect(result).toEqual(secret);
     const req = fn.mock.calls[0][0] as Request;
@@ -43,7 +43,7 @@ describe("api", () => {
 
   it("update wraps id + fields", async () => {
     const fn = stubFetch({ ok: true, data: secret });
-    const input = { name: "n", value: "v", type: "api_key" as const, project: "", environment: "-" as const, tags: [], notes: "" };
+    const input = { name: "n", value: "v", type: "api_key" as const, project: "", environment: ["-" as const], tags: [], notes: "" };
     await api.update(cfg, "abc", input);
     const req = fn.mock.calls[0][0] as Request;
     expect(JSON.parse(await req.text())).toEqual({
