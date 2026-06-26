@@ -10,7 +10,7 @@ export interface Secret {
   value: string;
   type: SecretType;
   project: string;
-  environment: Environment;
+  environment: Environment[];
   tags: string[];
   notes: string;
   createdAt: string;
