@@ -1,18 +1,19 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
+import { useRef } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { useCreateSecret, useUpdateSecret } from "../hooks/use-secrets";
 import type { Secret, SecretInput } from "../lib/schema";
-import { ENVIRONMENTS, SECRET_TYPE_LABELS, SECRET_TYPES } from "../lib/schema";
+import { ENVIRONMENTS, SECRET_TYPE_LABELS, SECRET_TYPES, environmentSchema } from "../lib/schema";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").refine((s) => s.trim().length > 0, "Name cannot be blank"),
   value: z.string().min(1, "Value is required"),
   type: z.enum(SECRET_TYPES),
   project: z.string(),
-  environment: z.enum(ENVIRONMENTS),
+  environment: environmentSchema,
   tags: z.string(), // comma-separated in the form; converted on submit
   notes: z.string(),
 });
@@ -40,6 +41,7 @@ function FieldError({ errors }: { errors: unknown[] }) {
 export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
   const createSecret = useCreateSecret();
   const updateSecret = useUpdateSecret();
+  const submitMode = useRef<"close" | "addAnother">("close");
 
   const form = useForm({
     defaultValues: {
@@ -47,7 +49,7 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
       value: secret?.value ?? "",
       type: secret?.type ?? ("api_key" as const),
       project: secret?.project ?? "",
-      environment: secret?.environment ?? ("-" as const),
+      environment: secret?.environment ?? ["-"],
       tags: secret?.tags.join(", ") ?? "",
       notes: secret?.notes ?? "",
     },
@@ -59,8 +61,23 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
       };
       if (secret) {
         await updateSecret.mutateAsync({ id: secret.id, fields: input });
-      } else {
-        await createSecret.mutateAsync(input);
+        onOpenChange(false);
+        return;
+      }
+
+      await createSecret.mutateAsync(input);
+      if (submitMode.current === "addAnother") {
+        form.reset({
+          name: "",
+          value: "",
+          type: value.type,
+          project: value.project,
+          environment: value.environment,
+          tags: "",
+          notes: "",
+        });
+        submitMode.current = "close";
+        return;
       }
       onOpenChange(false);
     },
@@ -140,21 +157,35 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
               </form.Field>
 
               <form.Field name="environment">
-                {(field) => (
-                  <div className="space-y-1">
-                    <label htmlFor="f-env" className={labelCls}>Environment</label>
-                    <select
-                      id="f-env"
-                      className={inputCls}
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value as (typeof ENVIRONMENTS)[number])}
-                    >
-                      {ENVIRONMENTS.map((env) => (
-                        <option key={env} value={env}>{env}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                {(field) => {
+                  const selected = field.state.value;
+                  return (
+                    <div className="space-y-1">
+                      <span className={labelCls}>Environment</span>
+                      <div className="flex flex-wrap gap-2">
+                        {ENVIRONMENTS.map((env) => (
+                          <label
+                            key={env}
+                            className="flex items-center gap-2 rounded-md border border-zinc-700 px-2 py-1.5 text-sm text-zinc-200"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected.includes(env)}
+                              onChange={(e) => {
+                                const next = e.target.checked
+                                  ? [...selected, env]
+                                  : selected.filter((v) => v !== env);
+                                field.handleChange(next);
+                              }}
+                            />
+                            {env}
+                          </label>
+                        ))}
+                      </div>
+                      <FieldError errors={field.state.meta.errors} />
+                    </div>
+                  );
+                }}
               </form.Field>
             </div>
 
@@ -211,13 +242,26 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
               </Dialog.Close>
               <form.Subscribe selector={(s) => s.isSubmitting}>
                 {(isSubmitting) => (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Saving…" : "Save"}
-                  </button>
+                  <>
+                    {!secret && (
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        onClick={() => { submitMode.current = "addAnother"; }}
+                        className="rounded-md border border-zinc-700 px-3 py-2 text-sm disabled:opacity-50"
+                      >
+                        {isSubmitting && submitMode.current === "addAnother" ? "Saving..." : "Save and add another"}
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      onClick={() => { submitMode.current = "close"; }}
+                      className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 disabled:opacity-50"
+                    >
+                      {isSubmitting && submitMode.current === "close" ? "Saving..." : "Save"}
+                    </button>
+                  </>
                 )}
               </form.Subscribe>
             </div>
