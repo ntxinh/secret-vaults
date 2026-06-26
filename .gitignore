@@ -5,3 +5,4 @@ dist/
 .clasprc.json
 .env*
 *.tsbuildinfo
+.worktrees/
