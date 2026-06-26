@@ -66,7 +66,7 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
       secrets.filter(
         (s) =>
           (typeFilter === "" || s.type === typeFilter) &&
-          (envFilter === "" || s.environment === envFilter) &&
+          (envFilter === "" || s.environment.includes(envFilter as Secret["environment"][number])) &&
           (projectFilter === "" || s.project === projectFilter),
       ),
     [secrets, typeFilter, envFilter, projectFilter],
@@ -83,7 +83,16 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
         cell: (info) => SECRET_TYPE_LABELS[info.getValue()],
       }),
       columnHelper.accessor("project", { header: "Project" }),
-      columnHelper.accessor("environment", { header: "Env" }),
+      columnHelper.accessor("environment", {
+        header: "Env",
+        cell: (info) => (
+          <div className="flex flex-wrap gap-1">
+            {info.getValue().map((env) => (
+              <span key={env} className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs">{env}</span>
+            ))}
+          </div>
+        ),
+      }),
       columnHelper.accessor("tags", {
         header: "Tags",
         cell: (info) => (
@@ -134,7 +143,7 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
     globalFilterFn: (row, _columnId, value: string) => {
       const q = value.toLowerCase();
       const s = row.original;
-      return [s.name, s.project, s.notes, ...s.tags].some((f) => f.toLowerCase().includes(q));
+      return [s.name, s.project, s.notes, ...s.tags, ...s.environment].some((f) => f.toLowerCase().includes(q));
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
