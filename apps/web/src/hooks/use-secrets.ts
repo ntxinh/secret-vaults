@@ -6,15 +6,15 @@ import { useAuthStore } from "../store/auth";
 import { useToastStore } from "../store/toasts";
 
 export function useApiConfig(): ApiConfig | null {
-  const gasUrl = useAuthStore((s) => s.gasUrl);
+  const apiUrl = useAuthStore((s) => s.apiUrl);
   const token = useAuthStore((s) => s.token);
-  return gasUrl && token ? { gasUrl, token } : null;
+  return apiUrl && token ? { apiUrl, token } : null;
 }
 
 export function useSecrets() {
   const cfg = useApiConfig();
   return useQuery({
-    queryKey: ["secrets", cfg?.gasUrl, cfg?.token],
+    queryKey: ["secrets", cfg?.apiUrl, cfg?.token],
     queryFn: () => api.list(cfg!),
     enabled: cfg !== null,
   });

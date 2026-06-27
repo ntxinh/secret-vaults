@@ -11,6 +11,12 @@ run = "pnpm --filter web build"
 [tasks.test]
 run = "pnpm -r test"
 
+[tasks."worker:dev"]
+run = "pnpm --filter worker dev"
+
+[tasks."worker:deploy"]
+run = "pnpm --filter worker exec wrangler deploy"
+
 [tasks."gas:push"]
 run = "pnpm --filter gas build && pnpm --filter gas push"
 

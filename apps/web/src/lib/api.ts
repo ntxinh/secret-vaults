@@ -16,7 +16,7 @@ export class ApiError extends Error {
 }
 
 export interface ApiConfig {
-  gasUrl: string;
+  apiUrl: string;
   token: string;
 }
 
@@ -44,7 +44,7 @@ async function call<T>(
   let text: string;
   try {
     const res = await fetch(
-      new Request(cfg.gasUrl, {
+      new Request(cfg.apiUrl, {
         method: "POST",
         body: JSON.stringify(body),
         headers: { "content-type": "text/plain;charset=utf-8" },

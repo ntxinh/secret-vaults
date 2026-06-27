@@ -3,6 +3,7 @@ node_modules/
 out/
 dist/
 .clasprc.json
+.wrangler/
 .env*
 *.tsbuildinfo
 .worktrees/

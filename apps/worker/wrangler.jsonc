@@ -1,0 +1,11 @@
+{
+  "name": "secret-vaults-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-27",
+  "kv_namespaces": [
+    {
+      "binding": "SECRETS",
+      "id": "TODO_replace_with_your_kv_namespace_id"
+    }
+  ]
+}

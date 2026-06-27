@@ -7,7 +7,7 @@ import { buttonClasses, fieldClasses, labelClasses } from "./style-tokens";
 
 export function LoginForm() {
   const setCredentials = useAuthStore((s) => s.setCredentials);
-  const [gasUrl, setGasUrl] = useState("");
+  const [apiUrl, setApiUrl] = useState("");
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,8 +17,8 @@ export function LoginForm() {
     setLoading(true);
     setError(null);
     try {
-      await api.list({ gasUrl: gasUrl.trim(), token: token.trim() });
-      setCredentials(gasUrl.trim(), token.trim());
+      await api.list({ apiUrl: apiUrl.trim(), token: token.trim() });
+      setCredentials(apiUrl.trim(), token.trim());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect");
     } finally {
@@ -31,14 +31,14 @@ export function LoginForm() {
       <form onSubmit={onSubmit} className="w-full max-w-xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-10 sm:p-12">
         <h1 className="text-3xl font-semibold sm:text-4xl">Secret Vaults</h1>
         <div className="space-y-1">
-          <label htmlFor="gasUrl" className={labelClasses}>Apps Script web app URL</label>
+          <label htmlFor="apiUrl" className={labelClasses}>API URL</label>
           <input
-            id="gasUrl"
+            id="apiUrl"
             type="url"
             required
-            value={gasUrl}
-            onChange={(e) => setGasUrl(e.target.value)}
-            placeholder="https://script.google.com/macros/s/…/exec"
+            value={apiUrl}
+            onChange={(e) => setApiUrl(e.target.value)}
+            placeholder="https://secret-vaults-api.&lt;account&gt;.workers.dev"
             className={fieldClasses.input}
           />
         </div>

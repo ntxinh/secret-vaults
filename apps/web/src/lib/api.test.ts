@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { api, ApiError } from "./api";
 
-const cfg = { gasUrl: "https://script.example/exec", token: "tok" };
+const cfg = { apiUrl: "https://script.example/exec", token: "tok" };
 
 const secret = {
   id: "abc", name: "n", value: "v", type: "api_key", project: "",
@@ -26,9 +26,9 @@ describe("api", () => {
     expect(result).toEqual([secret]);
 
     const req = fn.mock.calls[0][0] as Request;
-    expect(req.url).toBe(cfg.gasUrl);
+    expect(req.url).toBe(cfg.apiUrl);
     expect(req.method).toBe("POST");
-    expect(req.headers.get("content-type")).toContain("text/plain");
+    expect(req.headers.get("content-type")).toContain("text/plain"); // GAS compatibility: no CORS preflight
     expect(JSON.parse(await req.text())).toEqual({ token: "tok", action: "list" });
   });
 
