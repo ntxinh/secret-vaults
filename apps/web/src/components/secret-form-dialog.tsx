@@ -74,8 +74,8 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
           type: value.type,
           project: value.project,
           environment: value.environment,
-          tags: "",
-          notes: "",
+          tags: value.tags,
+          notes: value.notes,
         });
         return;
       }
