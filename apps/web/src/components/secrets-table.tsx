@@ -13,6 +13,7 @@ import type { Secret } from "../lib/schema";
 import { ENVIRONMENTS, SECRET_TYPE_LABELS, SECRET_TYPES } from "../lib/schema";
 import { useToastStore } from "../store/toasts";
 import { useUiStore } from "../store/ui";
+import { buttonClasses, chipClasses, fieldClasses, iconButtonClasses } from "./style-tokens";
 
 const columnHelper = createColumnHelper<Secret>();
 
@@ -27,17 +28,17 @@ function ValueCell({ secret }: { secret: Secret }) {
   }
 
   return (
-    <div className="flex items-center gap-2 font-mono text-xs">
-      <span className="max-w-48 truncate">{revealed ? secret.value : "••••••••"}</span>
+    <div className="flex items-center gap-2 font-mono text-sm">
+      <span className="max-w-56 truncate">{revealed ? secret.value : "••••••••"}</span>
       <button
         type="button"
         onClick={() => toggleRevealed(secret.id)}
         title={revealed ? "Hide" : "Reveal"}
-        className="text-zinc-400 hover:text-zinc-100"
+        className={iconButtonClasses}
       >
         {revealed ? "🙈" : "👁"}
       </button>
-      <button type="button" onClick={copy} title="Copy" className="text-zinc-400 hover:text-zinc-100">
+      <button type="button" onClick={copy} title="Copy" className={iconButtonClasses}>
         📋
       </button>
     </div>
@@ -88,7 +89,9 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
         cell: (info) => (
           <div className="flex flex-wrap gap-1">
             {info.getValue().map((env) => (
-              <span key={env} className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs">{env}</span>
+              <span key={env} className={chipClasses}>
+                {env}
+              </span>
             ))}
           </div>
         ),
@@ -98,7 +101,9 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
         cell: (info) => (
           <div className="flex flex-wrap gap-1">
             {info.getValue().map((t) => (
-              <span key={t} className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs">{t}</span>
+              <span key={t} className={chipClasses}>
+                {t}
+              </span>
             ))}
           </div>
         ),
@@ -113,22 +118,22 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
         id: "actions",
         header: "",
         cell: (info) => (
-          <div className="flex justify-end gap-2 text-sm">
-            <button
-              type="button"
-              onClick={() => onEdit(info.row.original)}
-              className="text-zinc-400 hover:text-zinc-100"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(info.row.original)}
-              className="text-red-400 hover:text-red-300"
-            >
-              Delete
-            </button>
-          </div>
+        <div className="flex justify-end gap-2 text-base">
+          <button
+            type="button"
+            onClick={() => onEdit(info.row.original)}
+            className={buttonClasses.ghost}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(info.row.original)}
+            className="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-base font-medium text-red-400 transition hover:bg-red-950/40 hover:text-red-300"
+          >
+            Delete
+          </button>
+        </div>
         ),
       }),
     ],
@@ -150,8 +155,6 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const selectCls = "rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-sm";
-
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -159,35 +162,41 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           placeholder="Search name, project, tags, notes…"
-          className="w-full max-w-xs rounded-md border border-zinc-700 bg-zinc-950 px-3 py-1.5 text-sm"
+          className={`${fieldClasses.input} max-w-sm`}
         />
-        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={selectCls}>
+        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={fieldClasses.select}>
           <option value="">All types</option>
           {SECRET_TYPES.map((t) => (
-            <option key={t} value={t}>{SECRET_TYPE_LABELS[t]}</option>
+            <option key={t} value={t}>
+              {SECRET_TYPE_LABELS[t]}
+            </option>
           ))}
         </select>
-        <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)} className={selectCls}>
+        <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)} className={fieldClasses.select}>
           <option value="">All envs</option>
           {ENVIRONMENTS.map((e2) => (
-            <option key={e2} value={e2}>{e2}</option>
+            <option key={e2} value={e2}>
+              {e2}
+            </option>
           ))}
         </select>
-        <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className={selectCls}>
+        <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className={fieldClasses.select}>
           <option value="">All projects</option>
           {projects.map((p) => (
-            <option key={p} value={p}>{p}</option>
+            <option key={p} value={p}>
+              {p}
+            </option>
           ))}
         </select>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-zinc-800">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-zinc-900 text-xs uppercase text-zinc-400">
+        <table className="w-full text-left text-base">
+          <thead className="bg-zinc-900 text-sm uppercase text-zinc-400">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (
-                  <th key={h.id} className="px-3 py-2">
+                  <th key={h.id} className="px-4 py-3">
                     {h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}
                   </th>
                 ))}
@@ -197,7 +206,7 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
           <tbody className="divide-y divide-zinc-800">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-3 py-8 text-center text-zinc-500">
+                <td colSpan={columns.length} className="px-4 py-10 text-center text-zinc-500">
                   No secrets found
                 </td>
               </tr>
@@ -205,7 +214,7 @@ export function SecretsTable({ secrets, onEdit, onDelete }: Props) {
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="hover:bg-zinc-900/50">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-3 py-2">
+                    <td key={cell.id} className="px-4 py-3 align-middle">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

@@ -7,6 +7,7 @@ import { useAuthStore } from "../store/auth";
 import { DeleteSecretDialog } from "./delete-secret-dialog";
 import { SecretFormDialog } from "./secret-form-dialog";
 import { SecretsTable } from "./secrets-table";
+import { buttonClasses } from "./style-tokens";
 
 export function Vault() {
   const { data, isPending, isError } = useSecrets();
@@ -29,26 +30,22 @@ export function Vault() {
   const [deleting, setDeleting] = useState<Secret | null>(null);
 
   return (
-    <main className="mx-auto max-w-6xl space-y-4 p-4 sm:p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Secret Vaults</h1>
+    <main className="mx-auto max-w-6xl space-y-7 px-6 py-8 sm:px-10 sm:py-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-semibold sm:text-4xl">Secret Vaults</h1>
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={openCreate}
-            className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900"
-          >
+          <button type="button" onClick={openCreate} className={buttonClasses.primary}>
             Add secret
           </button>
-          <button type="button" onClick={clear} className="text-sm text-zinc-400 hover:text-zinc-100">
+          <button type="button" onClick={clear} className={buttonClasses.ghost}>
             Lock
           </button>
         </div>
       </div>
       {isPending ? (
-        <p className="text-zinc-500">Loading…</p>
+        <p className="text-lg leading-7 text-zinc-500">Loading…</p>
       ) : isError ? (
-        <p className="text-red-400">Failed to load secrets.</p>
+        <p className="text-lg leading-7 text-red-400">Failed to load secrets.</p>
       ) : (
         <SecretsTable secrets={secrets} onEdit={openEdit} onDelete={setDeleting} />
       )}

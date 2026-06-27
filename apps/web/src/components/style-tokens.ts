@@ -20,7 +20,7 @@ export const fieldClasses = {
 export const labelClasses = "text-sm leading-5 text-zinc-400";
 
 export const chipClasses =
-  "inline-flex min-h-8 items-center rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium leading-5 text-zinc-100";
+  "inline-flex min-h-11 items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm font-medium leading-6 text-zinc-100";
 
 export const iconButtonClasses =
   "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2.5 text-zinc-400 transition-colors hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#FCD535]/40";

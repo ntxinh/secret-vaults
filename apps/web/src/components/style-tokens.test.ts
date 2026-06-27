@@ -42,9 +42,7 @@ describe("style tokens", () => {
   });
 
   it("exports readable chip classes", () => {
-    expect(chipClasses).toContain("min-h-8");
-    expect(chipClasses).toContain("text-xs");
-    expect(chipClasses).toContain("px-2.5");
+    expect(tokens(chipClasses)).toEqual(expect.arrayContaining(["min-h-11", "px-3", "py-1.5", "text-sm"]));
   });
 
   it("exports readable icon button classes", () => {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { api } from "../lib/api";
 import { useAuthStore } from "../store/auth";
+import { buttonClasses, fieldClasses, labelClasses } from "./style-tokens";
 
 export function LoginForm() {
   const setCredentials = useAuthStore((s) => s.setCredentials);
@@ -26,11 +27,11 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-md space-y-4 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <h1 className="text-lg font-semibold">Secret Vaults</h1>
+    <main className="flex min-h-screen items-center justify-center p-6 sm:p-8">
+      <form onSubmit={onSubmit} className="w-full max-w-xl space-y-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-10 sm:p-12">
+        <h1 className="text-3xl font-semibold sm:text-4xl">Secret Vaults</h1>
         <div className="space-y-1">
-          <label htmlFor="gasUrl" className="text-sm text-zinc-400">Apps Script web app URL</label>
+          <label htmlFor="gasUrl" className={labelClasses}>Apps Script web app URL</label>
           <input
             id="gasUrl"
             type="url"
@@ -38,26 +39,22 @@ export function LoginForm() {
             value={gasUrl}
             onChange={(e) => setGasUrl(e.target.value)}
             placeholder="https://script.google.com/macros/s/…/exec"
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
+            className={fieldClasses.input}
           />
         </div>
         <div className="space-y-1">
-          <label htmlFor="token" className="text-sm text-zinc-400">API token</label>
+          <label htmlFor="token" className={labelClasses}>API token</label>
           <input
             id="token"
             type="password"
             required
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
+            className={fieldClasses.input}
           />
         </div>
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 disabled:opacity-50"
-        >
+        {error && <p className="text-lg leading-7 text-red-400">{error}</p>}
+        <button type="submit" disabled={loading} className={`${buttonClasses.primary} w-full disabled:opacity-50`}>
           {loading ? "Connecting…" : "Unlock vault"}
         </button>
       </form>
