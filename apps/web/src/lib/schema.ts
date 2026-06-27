@@ -2,7 +2,21 @@ import { z } from "zod";
 
 export const SECRET_TYPES = ["api_key", "connection_string", "client_secret", "other"] as const;
 export const ENVIRONMENTS = ["dev", "staging", "prod", "-"] as const;
-export const environmentSchema = z.array(z.enum(ENVIRONMENTS)).min(1, "Select at least one environment");
+const environmentListSchema = z
+  .array(z.enum(ENVIRONMENTS))
+  .min(1, "Select at least one environment");
+
+export const environmentSchema = environmentListSchema;
+
+export const environmentResponseSchema = z.preprocess((value) => {
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+  return value;
+}, environmentListSchema);
 
 export const secretSchema = z.object({
   id: z.string().min(1),
@@ -15,6 +29,10 @@ export const secretSchema = z.object({
   notes: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
+});
+
+export const secretResponseSchema = secretSchema.extend({
+  environment: environmentResponseSchema,
 });
 
 export const secretInputSchema = secretSchema.omit({

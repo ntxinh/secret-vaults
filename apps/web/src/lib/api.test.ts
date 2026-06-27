@@ -32,6 +32,11 @@ describe("api", () => {
     expect(JSON.parse(await req.text())).toEqual({ token: "tok", action: "list" });
   });
 
+  it("list normalizes legacy string environment values", async () => {
+    stubFetch({ ok: true, data: [{ ...secret, environment: "dev, prod" }] });
+    await expect(api.list(cfg)).resolves.toEqual([{ ...secret, environment: ["dev", "prod"] }]);
+  });
+
   it("create sends payload and parses created secret", async () => {
     const fn = stubFetch({ ok: true, data: secret });
     const input = { name: "n", value: "v", type: "api_key" as const, project: "", environment: ["-" as const], tags: [], notes: "" };

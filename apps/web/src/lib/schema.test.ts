@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { secretInputSchema, secretSchema } from "./schema";
+import { secretInputSchema, secretResponseSchema, secretSchema } from "./schema";
 
 const valid = {
   id: "abc",
@@ -19,13 +19,20 @@ describe("secretSchema", () => {
     expect(secretSchema.parse(valid)).toEqual(valid);
   });
 
+  it("normalizes legacy string environment values", () => {
+    expect(secretResponseSchema.parse({ ...valid, environment: "dev, prod" })).toEqual({
+      ...valid,
+      environment: ["dev", "prod"],
+    });
+  });
+
   it.each([
     ["empty name", { ...valid, name: "" }],
     ["empty value", { ...valid, value: "" }],
     ["bad type", { ...valid, type: "password" }],
     ["empty environment", { ...valid, environment: [] }],
     ["bad environment", { ...valid, environment: ["qa"] }],
-    ["non-array environment", { ...valid, environment: "prod" }],
+    ["bad legacy string environment", { ...valid, environment: "qa, prod" }],
     ["non-string tag", { ...valid, tags: [1] }],
   ])("rejects %s", (_label, input) => {
     expect(secretSchema.safeParse(input).success).toBe(false);

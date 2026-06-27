@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { secretSchema } from "./schema";
+import { secretResponseSchema, secretSchema } from "./schema";
 import type { SecretInput } from "./schema";
 
 export const ERROR_CODES = ["UNAUTHORIZED", "BAD_REQUEST", "NOT_FOUND", "INTERNAL"] as const;
@@ -64,7 +64,7 @@ async function call<T>(
 }
 
 export const api = {
-  list: (cfg: ApiConfig) => call(cfg, "list", undefined, z.array(secretSchema)),
+  list: (cfg: ApiConfig) => call(cfg, "list", undefined, z.array(secretResponseSchema)),
   create: (cfg: ApiConfig, input: SecretInput) => call(cfg, "create", input, secretSchema),
   update: (cfg: ApiConfig, id: string, fields: SecretInput) =>
     call(cfg, "update", { id, fields }, secretSchema),
