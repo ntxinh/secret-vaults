@@ -14,7 +14,7 @@ export function useApiConfig(): ApiConfig | null {
 export function useSecrets() {
   const cfg = useApiConfig();
   return useQuery({
-    queryKey: ["secrets"],
+    queryKey: ["secrets", cfg?.gasUrl, cfg?.token],
     queryFn: () => api.list(cfg!),
     enabled: cfg !== null,
   });

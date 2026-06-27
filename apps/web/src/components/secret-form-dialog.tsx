@@ -1,12 +1,12 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useRef } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { useCreateSecret, useUpdateSecret } from "../hooks/use-secrets";
 import type { Secret, SecretInput } from "../lib/schema";
 import { ENVIRONMENTS, SECRET_TYPE_LABELS, SECRET_TYPES, environmentSchema } from "../lib/schema";
+import { buttonClasses, dialogClasses, fieldClasses, labelClasses } from "./style-tokens";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").refine((s) => s.trim().length > 0, "Name cannot be blank"),
@@ -25,8 +25,9 @@ interface Props {
   secret?: Secret;
 }
 
-const inputCls = "w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm";
-const labelCls = "text-sm text-zinc-400";
+type SubmitMeta = {
+  action?: "addAnother";
+};
 
 function FieldError({ errors }: { errors: unknown[] }) {
   if (errors.length === 0) return null;
@@ -41,9 +42,9 @@ function FieldError({ errors }: { errors: unknown[] }) {
 export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
   const createSecret = useCreateSecret();
   const updateSecret = useUpdateSecret();
-  const submitMode = useRef<"close" | "addAnother">("close");
 
   const form = useForm({
+    onSubmitMeta: {} as SubmitMeta,
     defaultValues: {
       name: secret?.name ?? "",
       value: secret?.value ?? "",
@@ -54,7 +55,7 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
       notes: secret?.notes ?? "",
     },
     validators: { onSubmit: formSchema },
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value, meta }) => {
       const input: SecretInput = {
         ...value,
         tags: value.tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -66,7 +67,7 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
       }
 
       await createSecret.mutateAsync(input);
-      if (submitMode.current === "addAnother") {
+      if (meta?.action === "addAnother") {
         form.reset({
           name: "",
           value: "",
@@ -76,7 +77,6 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
           tags: "",
           notes: "",
         });
-        submitMode.current = "close";
         return;
       }
       onOpenChange(false);
@@ -93,12 +93,12 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/60" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <Dialog.Title className="text-lg font-semibold">
+        <Dialog.Content className={`${dialogClasses.panel} max-w-2xl p-8 sm:p-9`}>
+          <Dialog.Title className={`${dialogClasses.title} text-2xl`}>
             {secret ? "Edit secret" : "Add secret"}
           </Dialog.Title>
           <form
-            className="mt-4 space-y-4"
+            className="mt-6 space-y-5"
             onSubmit={(e) => {
               e.preventDefault();
               void form.handleSubmit();
@@ -106,11 +106,11 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
           >
             <form.Field name="name">
               {(field) => (
-                <div className="space-y-1">
-                  <label htmlFor="f-name" className={labelCls}>Name *</label>
+                <div className="space-y-2">
+                  <label htmlFor="f-name" className={`${labelClasses} text-base`}>Name *</label>
                   <input
                     id="f-name"
-                    className={inputCls}
+                    className={`${fieldClasses.input} text-base`}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -122,12 +122,12 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
 
             <form.Field name="value">
               {(field) => (
-                <div className="space-y-1">
-                  <label htmlFor="f-value" className={labelCls}>Value *</label>
+                <div className="space-y-2">
+                  <label htmlFor="f-value" className={`${labelClasses} text-base`}>Value *</label>
                   <textarea
                     id="f-value"
-                    rows={2}
-                    className={`${inputCls} font-mono`}
+                    rows={4}
+                    className={`${fieldClasses.textarea} min-h-32 text-base font-mono`}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -137,14 +137,14 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
               )}
             </form.Field>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <form.Field name="type">
                 {(field) => (
-                  <div className="space-y-1">
-                    <label htmlFor="f-type" className={labelCls}>Type</label>
+                  <div className="space-y-2">
+                    <label htmlFor="f-type" className={`${labelClasses} text-base`}>Type</label>
                     <select
                       id="f-type"
-                      className={inputCls}
+                      className={`${fieldClasses.select} text-base`}
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value as (typeof SECRET_TYPES)[number])}
                     >
@@ -160,16 +160,17 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
                 {(field) => {
                   const selected = field.state.value;
                   return (
-                    <div className="space-y-1">
-                      <span className={labelCls}>Environment</span>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
+                      <span className={`${labelClasses} text-base`}>Environment</span>
+                      <div className="flex flex-wrap gap-3">
                         {ENVIRONMENTS.map((env) => (
                           <label
                             key={env}
-                            className="flex items-center gap-2 rounded-md border border-zinc-700 px-2 py-1.5 text-sm text-zinc-200"
+                            className="flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-zinc-700 px-3 py-2.5 text-base text-zinc-200"
                           >
                             <input
                               type="checkbox"
+                              className="h-5 w-5 rounded border-zinc-600 bg-zinc-950 text-[#FCD535] focus:ring-[#FCD535]/40"
                               checked={selected.includes(env)}
                               onChange={(e) => {
                                 const next = e.target.checked
@@ -191,11 +192,11 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
 
             <form.Field name="project">
               {(field) => (
-                <div className="space-y-1">
-                  <label htmlFor="f-project" className={labelCls}>Project</label>
+                <div className="space-y-2">
+                  <label htmlFor="f-project" className={`${labelClasses} text-base`}>Project</label>
                   <input
                     id="f-project"
-                    className={inputCls}
+                    className={`${fieldClasses.input} text-base`}
                     placeholder="e.g. AWS prod, Stripe"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -206,11 +207,11 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
 
             <form.Field name="tags">
               {(field) => (
-                <div className="space-y-1">
-                  <label htmlFor="f-tags" className={labelCls}>Tags (comma-separated)</label>
+                <div className="space-y-2">
+                  <label htmlFor="f-tags" className={`${labelClasses} text-base`}>Tags (comma-separated)</label>
                   <input
                     id="f-tags"
-                    className={inputCls}
+                    className={`${fieldClasses.input} text-base`}
                     placeholder="payments, critical"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -221,12 +222,12 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
 
             <form.Field name="notes">
               {(field) => (
-                <div className="space-y-1">
-                  <label htmlFor="f-notes" className={labelCls}>Notes</label>
+                <div className="space-y-2">
+                  <label htmlFor="f-notes" className={`${labelClasses} text-base`}>Notes</label>
                   <textarea
                     id="f-notes"
-                    rows={2}
-                    className={inputCls}
+                    rows={4}
+                    className={`${fieldClasses.textarea} min-h-28 text-base`}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                   />
@@ -234,9 +235,9 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
               )}
             </form.Field>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:justify-end">
               <Dialog.Close asChild>
-                <button type="button" className="rounded-md border border-zinc-700 px-3 py-2 text-sm">
+                <button type="button" className={buttonClasses.secondary}>
                   Cancel
                 </button>
               </Dialog.Close>
@@ -245,21 +246,22 @@ export function SecretFormDialog({ open, onOpenChange, secret }: Props) {
                   <>
                     {!secret && (
                       <button
-                        type="submit"
+                        type="button"
                         disabled={isSubmitting}
-                        onClick={() => { submitMode.current = "addAnother"; }}
-                        className="rounded-md border border-zinc-700 px-3 py-2 text-sm disabled:opacity-50"
+                        onClick={() => {
+                          void form.handleSubmit({ action: "addAnother" });
+                        }}
+                        className={buttonClasses.secondary}
                       >
-                        {isSubmitting && submitMode.current === "addAnother" ? "Saving..." : "Save and add another"}
+                        {isSubmitting ? "Saving..." : "Save and add another"}
                       </button>
                     )}
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      onClick={() => { submitMode.current = "close"; }}
-                      className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 disabled:opacity-50"
+                      className={buttonClasses.primary}
                     >
-                      {isSubmitting && submitMode.current === "close" ? "Saving..." : "Save"}
+                      {isSubmitting ? "Saving..." : "Save"}
                     </button>
                   </>
                 )}
