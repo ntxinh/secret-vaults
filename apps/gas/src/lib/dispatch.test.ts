@@ -24,7 +24,7 @@ function makeFakeStore(initial: Secret[] = []): SecretStore & { rows: Secret[] }
 
 const existing: Secret = {
   id: "id-1", name: "old", value: "v1", type: "api_key", project: "p",
-  environment: "dev", tags: [], notes: "", createdAt: "2026-01-01T00:00:00.000Z",
+  environment: ["dev"], tags: [], notes: "", createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
@@ -47,7 +47,7 @@ describe("handleAction", () => {
       ok: true,
       data: {
         id: "new-uuid", name: "n", value: "v", type: "other", project: "",
-        environment: "-", tags: [], notes: "",
+        environment: ["-"], tags: [], notes: "",
         createdAt: "2026-06-06T12:00:00.000Z", updatedAt: "2026-06-06T12:00:00.000Z",
       },
     });
@@ -69,7 +69,7 @@ describe("handleAction", () => {
       ok: true,
       data: {
         id: "id-1", name: "new name", value: "v2", type: "client_secret",
-        project: "", environment: "-", tags: [], notes: "",
+        project: "", environment: ["-"], tags: [], notes: "",
         createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-06-06T12:00:00.000Z",
       },
     });

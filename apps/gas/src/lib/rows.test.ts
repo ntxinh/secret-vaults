@@ -8,7 +8,7 @@ const secret: Secret = {
   value: "sk_live_xyz",
   type: "api_key",
   project: "Stripe",
-  environment: "prod",
+  environment: ["dev", "prod"],
   tags: ["payments", "critical"],
   notes: "rotate quarterly",
   createdAt: "2026-06-06T00:00:00.000Z",
@@ -19,7 +19,7 @@ describe("secretToRow", () => {
   it("serializes in HEADERS order with comma-joined tags", () => {
     expect(secretToRow(secret)).toEqual([
       "abc-123", "Stripe key", "sk_live_xyz", "api_key", "Stripe",
-      "prod", "payments,critical", "rotate quarterly",
+      "dev,prod", "payments,critical", "rotate quarterly",
       "2026-06-06T00:00:00.000Z", "2026-06-06T00:00:00.000Z",
     ]);
   });
@@ -45,5 +45,11 @@ describe("rowToSecret", () => {
     const row = secretToRow(secret);
     row[6] = "a , b ,c";
     expect(rowToSecret(row).tags).toEqual(["a", "b", "c"]);
+  });
+
+  it("trims whitespace around environments", () => {
+    const row = secretToRow(secret);
+    row[5] = "dev , prod";
+    expect(rowToSecret(row).environment).toEqual(["dev", "prod"]);
   });
 });

@@ -7,7 +7,7 @@ const valid = {
   value: "sk_live_xyz",
   type: "api_key",
   project: "Stripe",
-  environment: "prod",
+  environment: ["prod"],
   tags: ["payments"],
   notes: "",
   createdAt: "2026-06-06T00:00:00.000Z",
@@ -23,7 +23,9 @@ describe("secretSchema", () => {
     ["empty name", { ...valid, name: "" }],
     ["empty value", { ...valid, value: "" }],
     ["bad type", { ...valid, type: "password" }],
-    ["bad environment", { ...valid, environment: "qa" }],
+    ["empty environment", { ...valid, environment: [] }],
+    ["bad environment", { ...valid, environment: ["qa"] }],
+    ["non-array environment", { ...valid, environment: "prod" }],
     ["non-string tag", { ...valid, tags: [1] }],
   ])("rejects %s", (_label, input) => {
     expect(secretSchema.safeParse(input).success).toBe(false);

@@ -22,8 +22,18 @@ export function validateSecretInput(payload: unknown): ValidationResult<SecretIn
   if (typeof project !== "string") {
     return { ok: false, message: "project must be a string" };
   }
-  const environment = p.environment === undefined ? "-" : p.environment;
-  if (typeof environment !== "string" || !(ENVIRONMENTS as readonly string[]).includes(environment)) {
+  const environment = p.environment === undefined ? ["-"] : p.environment;
+  if (!Array.isArray(environment)) {
+    return { ok: false, message: "environment must be an array" };
+  }
+  if (environment.length === 0) {
+    return { ok: false, message: "environment must include at least one value" };
+  }
+  if (
+    environment.some(
+      (env) => typeof env !== "string" || !(ENVIRONMENTS as readonly string[]).includes(env),
+    )
+  ) {
     return { ok: false, message: `environment must be one of: ${ENVIRONMENTS.join(", ")}` };
   }
   const tags = p.tags === undefined ? [] : p.tags;
@@ -42,7 +52,7 @@ export function validateSecretInput(payload: unknown): ValidationResult<SecretIn
       value: p.value,
       type: p.type as SecretType,
       project,
-      environment: environment as Environment,
+      environment: environment as Environment[],
       tags: tags as string[],
       notes,
     },

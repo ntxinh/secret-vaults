@@ -6,7 +6,7 @@ const valid = {
   value: "sk_live_xyz",
   type: "api_key",
   project: "Stripe",
-  environment: "prod",
+  environment: ["prod"],
   tags: ["payments"],
   notes: "",
 };
@@ -20,7 +20,7 @@ describe("validateSecretInput", () => {
     const result = validateSecretInput({ name: "n", value: "v", type: "other" });
     expect(result).toEqual({
       ok: true,
-      value: { name: "n", value: "v", type: "other", project: "", environment: "-", tags: [], notes: "" },
+      value: { name: "n", value: "v", type: "other", project: "", environment: ["-"], tags: [], notes: "" },
     });
   });
 
@@ -29,7 +29,9 @@ describe("validateSecretInput", () => {
     [{ ...valid, name: "" }, "name is required"],
     [{ ...valid, value: "" }, "value is required"],
     [{ ...valid, type: "password" }, "type must be one of"],
-    [{ ...valid, environment: "qa" }, "environment must be one of"],
+    [{ ...valid, environment: [] }, "environment must include at least one value"],
+    [{ ...valid, environment: ["qa"] }, "environment must be one of"],
+    [{ ...valid, environment: "prod" }, "environment must be an array"],
     [{ ...valid, tags: "not-array" }, "tags must be an array of strings"],
     [{ ...valid, tags: [1] }, "tags must be an array of strings"],
     [{ ...valid, notes: 5 }, "notes must be a string"],
